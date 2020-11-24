@@ -1,26 +1,46 @@
 #Imports
 import streamlit as st
 import pandas as pd
-# import seaborn as sns
 import matplotlib.pyplot as plt 
 import pickle
+
+from data_class import InstaClass
 
 #Loading Pickled DataSets
 pickle_off = open("pickle_jar/dow.pickle", "rb")
 count_dow = pickle.load(pickle_off)
 
-#Begin actual
+#Title of Website
 st.title('Instacart Interactive DataSets')
 
+#Paragraph explaining what this dashboard does
 st.write('Rather than having one graph, why not have multiple?')
 
+#Different categories to filter instacart orders
 categories = ['alcohol', 'babies', 'bakery', 'beverages', 'breakfast',
  'bulk', 'canned goods', 'dairy eggs', 'deli', 'dry goods pasta',
  'frozen', 'household', 'international', 'meat seafood', 'missing',
  'other', 'pantry', 'personal care', 'pets', 'produce', 'snacks']
 
+#Select Box
 graph_type = st.sidebar.selectbox('Type of Chart', ['Line','Bar'])
+# multiple_line = st.sidebar.selectbox('')
 grocery_category = st.selectbox('Category Filter By', categories)
+
+#x axis/y axis variable names
+x_label = 'day of week'
+y_label = 'count'
+
+#Class instantiation
+s1 = InstaClass(count_dow, grocery_category, graph_type, x_label, y_label)
+
+s1.filter_category()
+s1.xy_split()
+fig, ax = s1.graph_plot()
+st.pyplot(fig)
+
+
+
 
 
 #options = st.multiselect(
@@ -29,30 +49,3 @@ grocery_category = st.selectbox('Category Filter By', categories)
 #  ['Yellow', 'Red'])
 
 
-
-def get_grocery_category(name):
-    data = None
-    data = count_dow[name]  
-    return data
-#   if name != 'all':
-#         
-#     else: 
-#         data = count_dow
-
-def type_of_chart(graph_type):
-    filtered_data = get_grocery_category(grocery_category)
-    if graph_type == 'Line':
-        fig, ax = plt.subplots()  
-        ax.plot(filtered_data.iloc[0],filtered_data.iloc[1])
-        ax.set(xlabel='day of week', ylabel='count',
-        title=f'Count of {grocery_category} items vs. day of week')
-    else: 
-        fig, ax = plt.subplots()  
-        ax.bar(filtered_data.iloc[0],filtered_data.iloc[1])
-        ax.set(xlabel='day of week', ylabel='count',
-        title=f'Count of {grocery_category} items vs. day of week')
-    return fig, ax
-       
-fig, ax = type_of_chart(graph_type)
-
-st.pyplot(fig)
