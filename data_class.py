@@ -23,12 +23,7 @@ class InstaClass:
         self.y=self.filtered_data.iloc[1]
     
     def graph_plot(self):
-        fig, ax = plt.subplots()
         if self.graph_type == 'Line': 
-            ax.plot(self.x, self.y)
+            plt.plot(self.x, self.y, label=self.grocery_category)
         else: 
-            ax.bar(self.x, self.y)
-        ax.set(xlabel=self.x_label, ylabel=self.y_label,
-               title=f'{self.y_label} of {self.grocery_category}')
-        return fig, ax
-        
+            plt.bar(self.x, self.y, label=self.grocery_category)
