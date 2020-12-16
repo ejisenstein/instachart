@@ -14,10 +14,10 @@ pickle_bar = open("pickle_jar/groupbar_two.pickle", "rb")
 groupbar_df = pickle.load(pickle_bar)
 #Department Grouped Bar
 #Filter By Product
-pickly = open("pickle_jar/dep_group_bar.pickle", "rb")
+pickly = open("pickle_jar/brine/dgp_brine.pickle", "rb")
 dep_group_bar_df = pickle.load(pickly)
 #Filter By Hour of Day
-kosher = open("pickle_jar/hourofday_group_bar.pickle", "rb")
+kosher = open("pickle_jar/brine/hod_gb_brine.pickle", "rb")
 hod_df = pickle.load(kosher)
 
 #Title of Website
