@@ -28,7 +28,7 @@ class Line_Stacked_Bar:
         self.y=self.filtered_data.iloc[1]
     
     def graph_plot(self):
-        if self.graph_type == 'Line': 
+        if self.graph_type == 'Line Chart': 
             plt.plot(self.x, self.y, label=self.grocery_category)
         else: 
             plt.bar(self.x, self.y, label=self.grocery_category)

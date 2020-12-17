@@ -27,10 +27,14 @@ st.title('Instachart')
 st.write('Instachart is a dynamic visualization of the [Instachart Market Basket Analysis](https://www.kaggle.com/c/instacart-market-basket-analysis) dataset. You can adjust the visualization through the sidebar as a  line chart, bar chart, or grouped bar chart. You can view as many grocery categories as you want, organized by day of the week (unfortuntately the dataset did not specify which numbers refer to which day)')
 
 #Different categories to filter instacart orders
-categories = ['alcohol', 'babies', 'bakery', 'beverages', 'breakfast',
+categories_line_bar = ['alcohol', 'babies', 'bakery', 'beverages', 'breakfast',
  'bulk', 'canned goods', 'dairy eggs', 'deli', 'dry goods pasta',
  'frozen', 'household', 'international', 'meat seafood', 'missing',
  'other', 'pantry', 'personal care', 'pets', 'produce', 'snacks']
+
+categories_dgb_list = ['babies', 'bulk', 'international']
+
+categories_hod_gb = ['babies', 'bulk', 'international', 'breakfast']
 
 #x axis/y axis variable names
 x_label = 'Day of Week'
@@ -38,13 +42,16 @@ y_label = 'Count'
 
 #Select Box 1
 graph_type = st.selectbox('Type of Chart', ['Line Chart', 'Stacked Bar Chart', 'Grouped Bar Chart'])
-if graph_type == 'Grouped Bar Chart': 
-    type_gb_chart = st.selectbox('Values for Grouped Bar Chart', ['Category', 'Product with Day of Week', 'Product with Hour of Day'])
-
-
-grocery_category_one = st.sidebar.multiselect('1. Category Filter By', categories, ['alcohol'])
-# num_of_categories = st.sidebar.selectbox('Number of Categories', [1, 2, 3])
-legend_location = st.sidebar.selectbox('1. Location of Legend', ['upper left', 'upper center', 'upper right'])
+if graph_type != 'Grouped Bar Chart':
+    grocery_category_one = st.sidebar.multiselect('Filter By Category', categories_line_bar, ['alcohol'])
+else: 
+    type_gb_chart = st.selectbox('Values for Grouped Bar Chart', ['Category with Day of Week', 'Product with Day of Week', 'Product with Hour of Day'])
+    if type_gb_chart == 'Category with Day of Week':
+        grocery_category_one = st.sidebar.multiselect('Filter By Category', categories_line_bar, ['alcohol'])
+    elif type_gb_chart == 'Product with Day of Week':
+        grocery_category_one = st.sidebar.selectbox('Filter By Category', categories_dgb_list)
+    elif type_gb_chart == 'Product with Hour of Day':
+        grocery_category_one = st.sidebar.selectbox('Filter By Category', categories_hod_gb,)
 
 
 #Grouped Bar Chat for referencehttps://stackoverflow.com/questions/42128467/matplotlib-plot-multiple-columns-of-pandas-data-frame-on-the-bar-chart
@@ -54,18 +61,26 @@ if graph_type != 'Grouped Bar Chart':
     for num, i in enumerate(total_instance_list):
         i = Line_Stacked_Bar(count_dow, grocery_category_one[num], graph_type, x_label, y_label)
         i.filter_split_graph()
-elif type_gb_chart == 'Category': 
+elif type_gb_chart == 'Category with Day of Week': 
     i = Grouped_Bar(groupbar_df)
     i.select_multiple_categories('department', grocery_category_one)
     i.pivot_plot('order_dow', 'department', 'count', 'bar')
 elif type_gb_chart == 'Product with Day of Week':
     i = Product_Group_Bar(dep_group_bar_df)
-    #Custom Sidebar for Product Name Filter
-    product_category = st.sidebar.multiselect('2. Product Filter By', i.return_multiselect_list('product_name'))
+    #Department Filter
+    i.basic_filter('department', grocery_category_one)
     
-    i.groupby_rename_reset(['product_name', 'order_dow'], 'order_id', 'count', 'count')
-    i.select_multiple_categories('product_name', product_category)
-    i.pivot_plot('order_dow', 'product_name', 'count', 'bar')
+    #Custom Sidebar for Product Name Filter
+    try: 
+        product_category = st.sidebar.multiselect('Product Filter', i.return_multiselect_list('product_name'))
+        i.groupby_rename_reset(['product_name', 'order_dow'], 'order_id', 'count', 'count')
+        i.select_multiple_categories('product_name', product_category)
+        i.pivot_plot('order_dow', 'product_name', 'count', 'bar')
+    except TypeError: 
+        st.text('Please select at least one Product to graph')
+    
+    
+    
 elif type_gb_chart == 'Product with Hour of Day':
     x_label = 'Hour of the Day'
     dow = st.sidebar.selectbox('DOW Filter By', [0, 1, 2, 3, 4, 5, 6])
@@ -74,13 +89,19 @@ elif type_gb_chart == 'Product with Hour of Day':
     i.basic_filter('order_dow', dow)
     
     #Custom Sidebar for Product Filter
-    product_category = st.sidebar.multiselect('2. Product Filter By', i.return_multiselect_list('product_name'))
+    # product_category = st.sidebar.multiselect('2. Product Filter By', i.return_multiselect_list('product_name'))
+    # product_category = st.sidebar.multiselect('Filter Product By', )
     
-    i.groupby_rename_reset(['order_hour_of_day','product_name'], 'order_id', 'count', 'count')
-    i.select_multiple_categories('product_name', product_category)
-    i.pivot_plot('order_hour_of_day', 'product_name', 'count', 'bar')
+    try: 
+        product_category = st.sidebar.multiselect('Product Filter', i.return_multiselect_list('product_name'))
+        i.groupby_rename_reset(['order_hour_of_day','product_name'], 'order_id', 'count', 'count')
+        i.select_multiple_categories('product_name', product_category)
+        i.pivot_plot('order_hour_of_day', 'product_name', 'count', 'bar')
+    except TypeError: 
+        print('Please select at least one Product to graph')
+    
 
-    
+legend_location = st.sidebar.selectbox('1. Location of Legend', ['upper left', 'upper center', 'upper right'])    
     
 #Matplotlib creation
 plt.xlabel(x_label)
